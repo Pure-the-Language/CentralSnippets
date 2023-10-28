@@ -1,9 +1,9 @@
 /* Search Text Lines Containing Keywords in Any Order
 Version: v0.1
 
-This script searches lines of text file that contains keywords in random order.
+This script searches lines of text file that contains keywords in random order. This script saves us effort having to write a regular expression.
 
-This script saves us effort having to write a regular expression.
+Also see: SearchFilesContainingKeywordsInFolder.cs
 */
 
 void Search(string filePath, string keywordsPhrase, char splitter = ' ')
