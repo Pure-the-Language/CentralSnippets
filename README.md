@@ -1,6 +1,6 @@
 # CentralSnippets
 
-A Github page central snippet repo. Accessible through experimental CentralSnippets add-on library.
+A Github page central snippet repo. Accessible through experimental CentralSnippets add-on library. This repo is available on [Github](https://github.com/Pure-the-Language/CentralSnippets).
 
 Access to this repo is implemented inside the [CentralSnippets](https://github.com/Pure-the-Language/Pure/tree/main/StandardLibraries/CentralSnippets) standard library.
 
