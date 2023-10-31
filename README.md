@@ -18,4 +18,14 @@ Anyone is welcome to contribute!
 In Pure:
 
 ```C#
+Import(CentralSnippets)
+Pull("Markdown/BuildToC", disableSSL: false);
+```
+
+To use another repo/develop locally:
+
+```C#
+Import(CentralSnippets)
+SnippetsHostSite = @"C:\GithubProjects\CentralSnippets";
+Preview("Markdown/BuildToC");
 ```
