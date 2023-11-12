@@ -1,7 +1,11 @@
 /* Stitch Images
-Version: v0.1
+Version: v0.2
 
 Performs the image presentation trick as often shown in Houdini, but programmed in C#, with programmably adjustable parameters.
+
+Changelog:
+* Version 0.1: Initial setup.
+* Version 0.2: Expose caption configurations.
 */
 Import(Magick.NET-Q8-AnyCPU)
 
@@ -12,6 +16,10 @@ public class Parameters
     public int ImagesPerRow = 2;
     public Color BackgroundColor = Color.Black;
     public Size Crop = new Size(1920, 1080);
+
+    public double FontSize = 52.0;
+    public MagickColor TextColor = MagickColors.White;
+    public Size CaptionBox = new Size(680, 250);
 }
 
 private static String ToHex(Color c)
@@ -45,11 +53,12 @@ public void Stitch(string sourceFolder, string outputFilePath, Parameters parame
         var captionSettings = new MagickReadSettings
         {
             Font = "Calibri",
+            FontPointsize = parameters.FontSize,
             TextGravity = Gravity.Center,
             BackgroundColor = MagickColors.Transparent,
-            Height = 250, // height of text box
-            Width = 680, // width of text box
-            FillColor = MagickColors.White
+            Height = parameters.CaptionBox.Height, // height of text box
+            Width = parameters.CaptionBox.Width, // width of text box
+            FillColor = parameters.TextColor
         };
         var caption = new MagickImage($"Caption:{Path.GetFileNameWithoutExtension(file)}", captionSettings);
         image.Composite(caption, parameters.Margin, parameters.Margin, CompositeOperator.Over);
@@ -70,4 +79,10 @@ Type:
 
 Method:
   void Stitch(string sourceFolder, string outputFilePath, Parameters parameters)
+
+Example:
+  Stitch(@"Input Folder", @"OutputPath.png", new Parameters(){
+	TextColor = MagickColors.Black,
+	CaptionBox = new Size(680, 250)
+  })
 """);
