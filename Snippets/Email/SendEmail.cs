@@ -23,6 +23,8 @@ void SendHTML(string from, string to, string title, string html, string server, 
     {
         Port = port,
         Credentials = new NetworkCredential(username, password),
+        DeliveryMethod = SmtpDeliveryMethod.Network,
+        UseDefaultCredentials = false,
         EnableSsl = true,
     };
     MailMessage mailMessage = new()
