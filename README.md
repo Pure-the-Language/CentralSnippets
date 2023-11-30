@@ -29,3 +29,5 @@ Import(CentralSnippets)
 SnippetsHostSite = @"C:\GithubProjects\CentralSnippets";
 Preview("Markdown/BuildToC");
 ```
+
+During development and for local use, one can also make use of `PUREPATH` environment variable: point `PUREPATH` to `local/path/to/CentralSnippets/Snippets`, then do `pure Demos\HelloWorld.cs`.
