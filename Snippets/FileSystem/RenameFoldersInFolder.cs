@@ -12,20 +12,20 @@ public record ItemChange(string OldName, string NewName, string OldPath, string 
 IEnumerable<ItemChange> EnumerateFolderItems(string folder, string pattern, string replacement)
 {
     // Enumerate folders in folder
-    foreach(string folder in Directory.EnumerateDirectories(folder))
+    foreach(string item in Directory.EnumerateDirectories(folder))
     {
-        string originalFolder = Path.GetDirectoryName(folder);
-        string originalFolderName = Path.GetFileName(folder);
-        string newFolderName = Regex.Replace(originalFolderName, pattern, replacement);
-        string newPath = Path.Combine(originalFolder, newFolderName);
+        string originalFolder = Path.GetDirectoryName(item);
+        string originalName = Path.GetFileName(item);
+        string newName = Regex.Replace(originalName, pattern, replacement);
+        string newPath = Path.Combine(originalFolder, newName);
         
         if (Directory.Exists(newPath))
         {
-            WriteLine($"Skip {newFolderName} (already exists)");
+            WriteLine($"Skip {newName} (already exists)");
             continue;   
         }
         
-        yield new ItemChange(oldFOlderName, newFolderName, folder, newPath);
+        yield return new ItemChange(originalName, newName, folder, newPath);
     }
 }
 
