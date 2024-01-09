@@ -14,10 +14,9 @@ IEnumerable<ItemChange> EnumerateFolderItems(string folder, string pattern, stri
     // Enumerate folders in folder
     foreach(string item in Directory.EnumerateDirectories(folder))
     {
-        string originalFolder = Path.GetDirectoryName(item);
         string originalName = Path.GetFileName(item);
         string newName = Regex.Replace(originalName, pattern, replacement);
-        string newPath = Path.Combine(originalFolder, newName);
+        string newPath = Path.Combine(folder, newName);
         
         if (Directory.Exists(newPath))
         {
@@ -25,7 +24,7 @@ IEnumerable<ItemChange> EnumerateFolderItems(string folder, string pattern, stri
             continue;   
         }
         
-        yield return new ItemChange(originalName, newName, folder, newPath);
+        yield return new ItemChange(originalName, newName, item, newPath);
     }
 }
 
