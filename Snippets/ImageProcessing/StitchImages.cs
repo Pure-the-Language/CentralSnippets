@@ -1,7 +1,10 @@
 /* Stitch Images
 Version: v0.2
+Last Update: 2023 Nov
 
 Performs the image presentation trick as often shown in Houdini, but programmed in C#, with programmably adjustable parameters.
+
+Notice Zora (at the moment inside ImageProcessing library) has an implementation for this as well.
 
 Changelog:
 * Version 0.1: Initial setup.
