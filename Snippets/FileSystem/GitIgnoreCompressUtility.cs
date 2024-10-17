@@ -1,8 +1,4 @@
-using System;
-using System.IO;
 using System.IO.Compression;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Setup
@@ -17,7 +13,6 @@ namespace Setup
         /// List of GitIgnore rules
         /// </summary>
         private readonly List<GitIgnoreRule> _ignoreRules = [];
-
         /// <summary>
         /// Initializes a new instance of the GitIgnoreCompressUtility class
         /// </summary>
@@ -36,14 +31,16 @@ namespace Setup
         /// <summary>
         /// Recursively loads ignore patterns from .gitignore and .customignore files
         /// </summary>
-        /// <param name="currentFolder">The current folder being processed</param>
         private void LoadIgnorePatternsRecursively(string currentFolder)
         {
+            string relativePath = Path.GetRelativePath(_rootFolder, currentFolder);
+
             // Process .gitignore files
             string[] gitIgnoreFiles = Directory.GetFiles(currentFolder, ".gitignore", SearchOption.TopDirectoryOnly);
             foreach (string gitIgnoreFile in gitIgnoreFiles)
             {
-                Console.WriteLine($"Processing .gitignore file: {gitIgnoreFile}");
+                string relativeGitIgnorePath = Path.GetRelativePath(_rootFolder, gitIgnoreFile);
+                Console.WriteLine($"Processing .gitignore file: {relativeGitIgnorePath}");
                 List<GitIgnoreRule> rules = ParseIgnoreFile(gitIgnoreFile, currentFolder);
                 _ignoreRules.AddRange(rules);
             }
@@ -52,7 +49,8 @@ namespace Setup
             string[] customIgnoreFiles = Directory.GetFiles(currentFolder, ".customignore", SearchOption.TopDirectoryOnly);
             foreach (string customIgnoreFile in customIgnoreFiles)
             {
-                Console.WriteLine($"Processing .customignore file: {customIgnoreFile}");
+                string relativeCustomIgnorePath = Path.GetRelativePath(_rootFolder, customIgnoreFile);
+                Console.WriteLine($"Processing .customignore file: {relativeCustomIgnorePath}");
                 List<GitIgnoreRule> rules = ParseIgnoreFile(customIgnoreFile, currentFolder);
                 // Set high priority for custom ignore rules
                 foreach (GitIgnoreRule rule in rules)
@@ -68,9 +66,6 @@ namespace Setup
         /// <summary>
         /// Parses an ignore file and creates GitIgnoreRule objects
         /// </summary>
-        /// <param name="filePath">Path to the ignore file</param>
-        /// <param name="basePath">Base path for the ignore rules</param>
-        /// <returns>List of parsed GitIgnoreRule objects</returns>
         private List<GitIgnoreRule> ParseIgnoreFile(string filePath, string basePath)
         {
             List<GitIgnoreRule> rules = [];
@@ -83,7 +78,6 @@ namespace Setup
                 if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith("#"))
                     continue;
 
-                // Check for negation patterns
                 bool isNegation = trimmedLine.StartsWith("!");
                 if (isNegation)
                     trimmedLine = trimmedLine[1..];
@@ -107,11 +101,15 @@ namespace Setup
                     rule.Sequence = -1;
 
                 rules.Add(rule);
-                Console.WriteLine($"Loaded pattern: '{(isNegation ? "!" : "")}{trimmedLine}' as regex '{regex}' from file '{filePath}'");
+                string relativeFilePath = Path.GetRelativePath(_rootFolder, filePath);
+                Console.WriteLine($"Loaded pattern: '{(isNegation ? "!" : "")}{trimmedLine}' as regex '{regex}' from file '{relativeFilePath}'");
             }
             return rules;
         }
 
+        /// <summary>
+        /// Converts a gitignore pattern to a regular expression
+        /// </summary>
         private string ConvertGitIgnorePatternToRegex(string pattern, string basePath)
         {
             bool matchFromRoot = pattern.StartsWith("/");
@@ -145,12 +143,24 @@ namespace Setup
             return regexPattern;
         }
 
-        private bool IsIgnored(string filePath, out string matchedPattern)
+        /// <summary>
+        /// Determines if a file should be included based on ignore rules
+        /// </summary>
+        private bool IsIncluded(string filePath, out string matchedPattern)
         {
             string relativePath = Path.GetRelativePath(_rootFolder, filePath).Replace(@"\", "/");
             matchedPattern = string.Empty;
+
+            // Hardcoded logic to ignore .git folder
+            if (relativePath.StartsWith(".git/", StringComparison.OrdinalIgnoreCase) || 
+                relativePath.Contains("/.git/", StringComparison.OrdinalIgnoreCase))
+            {
+                matchedPattern = "Hardcoded rule: .git folder";
+                return false;
+            }
+
             bool isIncluded = false;
-            bool parentIsIgnored = false;
+            bool parentIsIncluded = false;
             string[] pathParts = relativePath.Split('/');
 
             for (int i = 1; i <= pathParts.Length; i++)
@@ -163,7 +173,7 @@ namespace Setup
                         bool currentIsIncluded = !rule.IsNegation;
 
                         if (i < pathParts.Length)
-                            parentIsIgnored = currentIsIncluded;
+                            parentIsIncluded = currentIsIncluded;
                         else
                             isIncluded = currentIsIncluded;
                         matchedPattern = rule.OriginalPattern;
@@ -171,46 +181,85 @@ namespace Setup
                         if (rule.Sequence == -1)
                         {
                             isIncluded = false;
-                            Console.WriteLine($"File '{filePath}' is ignored due to custom ignore rule: {matchedPattern}");
+                            // Check if it's a directory
+                            if (Directory.Exists(filePath))
+                            {
+                                Console.WriteLine($"Directory '{relativePath}' is ignored due to custom ignore rule: {matchedPattern}");
+                                // Recursively check files in the ignored directory
+                                foreach (string file in Directory.GetFiles(filePath, "*", SearchOption.AllDirectories))
+                                {
+                                    string relativeFile = Path.GetRelativePath(_rootFolder, file);
+                                    Console.WriteLine($"File '{relativeFile}' is ignored due to parent directory being ignored");
+                                }
+                            }
+                            else
+                                Console.WriteLine($"File '{relativePath}' is ignored due to custom ignore rule: {matchedPattern}");
+                            return isIncluded;
                         }
                     }
                 }
-                if (parentIsIgnored)
+                if (parentIsIncluded)
                 {
                     isIncluded = true;
-                    matchedPattern = $"Parent directory '{subPath}' is ignored";
-                    Console.WriteLine($"File '{filePath}' is ignored because parent directory is ignored: {matchedPattern}");
+                    matchedPattern = $"Parent directory '{subPath}' is included";
                     break;
                 }
             }
 
-            return !isIncluded;
+            // Check for custom ignore rules in parent directories
+            if (isIncluded)
+            {
+                string? currentDir = Path.GetDirectoryName(filePath);
+                while (currentDir != null && currentDir != _rootFolder)
+                {
+                    string customIgnorePath = Path.Combine(currentDir, ".customignore");
+                    if (File.Exists(customIgnorePath))
+                    {
+                        string[] customIgnoreLines = File.ReadAllLines(customIgnorePath);
+                        string fileName = Path.GetFileName(filePath);
+                        if (customIgnoreLines.Any(line => line.Trim() == fileName))
+                        {
+                            isIncluded = false;
+                            string relativeCustomIgnorePath = Path.GetRelativePath(_rootFolder, customIgnorePath);
+                            matchedPattern = $"File name '{fileName}' matched in parent .customignore: {relativeCustomIgnorePath}";
+                            Console.WriteLine($"File '{relativePath}' is ignored due to custom ignore rule in parent directory: {matchedPattern}");
+                            return isIncluded;
+                        }
+                    }
+                    currentDir = Path.GetDirectoryName(currentDir);
+                }
+            }
+
+            return isIncluded;
         }
 
         /// <summary>
         /// Creates a zip archive containing files not ignored by the rules
         /// </summary>
-        /// <param name="zipFilePath">Path where the zip archive will be created</param>
         public void CreateZipArchive(string zipFilePath)
         {
             List<string> filesToInclude = [];
-            List<string> filesIgnored = [];
-            Console.WriteLine("Scanning files...");
+            List<string> pathsIgnored = [];
+            Console.WriteLine("Scanning files and directories...");
             
-            // Iterate through all files in the root folder and its subdirectories
-            foreach (string file in Directory.GetFiles(_rootFolder, "*", SearchOption.AllDirectories))
+            // Iterate through all files and directories in the root folder and its subdirectories
+            foreach (string path in Directory.GetFileSystemEntries(_rootFolder, "*", SearchOption.AllDirectories))
             {
-                if (IsIgnored(file, out string matchedPattern))
+                if (IsIncluded(path, out string matchedPattern))
                 {
-                    string relativePath = Path.GetRelativePath(_rootFolder, file);
-                    filesIgnored.Add(relativePath);
-                    Console.WriteLine($"Ignored: {relativePath} (Matched pattern: {matchedPattern})");
+                    if (File.Exists(path))
+                    {
+                        filesToInclude.Add(path);
+                        string relativePath = Path.GetRelativePath(_rootFolder, path);
+                        Console.WriteLine($"Included file: {relativePath}");
+                    }
+                    // We don't need to explicitly include directories in the zip file
                 }
                 else
                 {
-                    filesToInclude.Add(file);
-                    string relativePath = Path.GetRelativePath(_rootFolder, file);
-                    Console.WriteLine($"Included: {relativePath}");
+                    string relativePath = Path.GetRelativePath(_rootFolder, path);
+                    pathsIgnored.Add(relativePath);
+                    Console.WriteLine($"Ignored: {relativePath}");
                 }
             }
 
@@ -234,7 +283,7 @@ namespace Setup
             Console.WriteLine($"Archive created successfully at {zipFilePath}\n");
             Console.WriteLine("Summary:");
             Console.WriteLine($"Total files included: {filesToInclude.Count}");
-            Console.WriteLine($"Total files ignored: {filesIgnored.Count}");
+            Console.WriteLine($"Total paths ignored: {pathsIgnored.Count}");
         }
 
         /// <summary>
@@ -242,15 +291,25 @@ namespace Setup
         /// </summary>
         private class GitIgnoreRule
         {
-            // The compiled regex pattern for matching files
+            /// <summary>
+            /// The compiled regex pattern for matching files
+            /// </summary>
             public required Regex Pattern { get; set; }
-            // Indicates if this rule is a negation (inclusion) rule
+            /// <summary>
+            /// Indicates if this rule is a negation (inclusion) rule
+            /// </summary>
             public bool IsNegation { get; set; }
-            // The base path where this rule applies
+            /// <summary>
+            /// The base path where this rule applies
+            /// </summary>
             public required string BasePath { get; set; }
-            // The original pattern string from the ignore file
+            /// <summary>
+            /// The original pattern string from the ignore file
+            /// </summary>
             public required string OriginalPattern { get; set; }
-            // The sequence number for rule priority (lower numbers have higher priority)
+            /// <summary>
+            /// The sequence number for rule priority (lower numbers have higher priority)
+            /// </summary>
             public int Sequence { get; set; }
         }
     }
