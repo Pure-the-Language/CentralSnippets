@@ -1,5 +1,8 @@
 /* Send Plain Text Email
 Version: v0.1
+
+Remarks:
+* As of 2025-04-18: The functionalities of this snippet is available in Parcel NExT.
 */
 Import(Markdig)
 
