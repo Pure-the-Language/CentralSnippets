@@ -1,5 +1,5 @@
 /* Search Bookmarks for keywords
-Version: v0.1
+Version: v0.2
 
 Searches the bookmarks folder for bookmar items containing keywords in random order (not necessarily tags). It parses the tags and searches tags in random order.
 
@@ -18,7 +18,14 @@ TODO:
 - [ ] Configure search in subfolders
 
 To search full text from specific file or specific folder, one can use other snippets available under TextFile catagory.
+
+## Changelog
+
+* v0.1: Initial setup
+* v0.2: Update to latest Pure 2; Explicitly use static System.Console.
 */
+
+using static System.Console;
 
 #region Helpers
 (string Line, string Source)[] FindLinesInFiles(IEnumerable<string> filePaths, string[] keywords, bool caseSensitive = false)

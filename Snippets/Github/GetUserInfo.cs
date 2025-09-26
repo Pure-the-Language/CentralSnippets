@@ -1,12 +1,18 @@
 /* Get User Info
-Version: 0.1.0
+Version: 0.2
 
 Provides a one-shot query to get user repository and organization information. This is a more straightforward interface compared to Github website, which is manual and only shows limited number of things.
 
 For organization, per https://github.com/orgs/community/discussions/45996, Make sure that the token has the `read:org` scope.
+
+## Changelog
+
+* v0.1: Initial setup
+* v0.2: Update to latest Pure 2; Explicitly use static System.Console.
 */
 
 Import(Octokit)
+using static System.Console;
 
 #region Types
 public record RepositoryIdentity(string Organization, string Repository);

@@ -1,11 +1,18 @@
 /* Count Solution Code Lines
-Version: v0.1
+Version: v0.2
 Author: Charles Zhang
 Co-Author: ChatGPT o1-preview
 
 Recursively searches for .md and .cs files (ignoring .txt files), counts the total number of lines in these files, and outputs the result.
 Ignores obj and bin folder.
+
+## Changelog
+
+* v0.1: Initial setup
+* v0.2: Update to latest Pure 2; Explicitly use static System.Console.
 */
+
+using static System.Console;
 
 // Check if a folder path is provided
 if (Arguments.Length == 0)

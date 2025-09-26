@@ -1,11 +1,17 @@
 /* Search Files Containing Keywords in Folder
-Version: v0.1
+Version: v0.2
 
 Find texts in file containing keywords (random order).
 
 Also see: SearchTextLinesContainingKeywords.cs
+
+## Changelog
+
+* v0.1: Initial setup
+* v0.2: Update to latest Pure 2; Explicitly use static System.Console.
 */
 using System.Text;
+using static System.Console;
 
 void Search(string folder, params string[] keywords)
 {

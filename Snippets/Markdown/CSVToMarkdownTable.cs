@@ -1,10 +1,17 @@
 /* CSV to Markdown Table
-Version: v0.1
+Version: v0.2
 
 This snippet converts CSV/TSV delimited texts into Github flavoured Markdown table format. This script converts raw CSV/TSV to markdown format, with commonly helpful options including optional headers and formatting options. Notice such functionality is not easily possible with known tools and too inconvinient as a dedicated program and thus proving superiority of a scripting based solution and in particular Pure Notebook for extremely lightweight accessibility (the only thing that could be better would be the GUI interface itself can be more compact and efficient, e.g. allow collapsing or alternatively allow node-based containerization of functionalities as in Parcel).
+
+## Changelog
+
+* v0.1: Initial setup
+* v0.2: Update to latest Pure 2; Explicitly use static System.Console.
 */
 
 using System.Text;
+using static System.Console;
+
 string ConvertCSVToMarkdown(string input, char delimiter, bool containsHeader, bool centered = true, bool trim = false, Func<string, string> linePreprocessor = null, bool print = false, Func<string, bool> lineFilteringRule = null)
 {
 	StringBuilder builder = new();

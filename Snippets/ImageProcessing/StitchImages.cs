@@ -1,6 +1,7 @@
 /* Stitch Images
-Version: v0.2
-Last Update: 2023 Nov
+Version: v0.3
+Updates: 2023 Nov
+Last Update: 2025-09-26
 
 Performs the image presentation trick as often shown in Houdini, but programmed in C#, with programmably adjustable parameters.
 
@@ -9,8 +10,10 @@ Notice Zora (at the moment inside ImageProcessing library) has an implementation
 Changelog:
 * Version 0.1: Initial setup.
 * Version 0.2: Expose caption configurations.
+* Version 0.3: Update to latest Pure 2; Explicitly use static System.Console.
 */
 Import(Magick.NET-Q8-AnyCPU)
+using static System.Console;
 
 using System.Drawing;
 public class Parameters

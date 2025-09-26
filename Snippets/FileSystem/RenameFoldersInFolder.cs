@@ -1,12 +1,19 @@
 /* Rename folders in folder using regular expressions 
-Version: v0.1
+Version: v0.2
 Original Date: 2024-01-09
-Last Update Date: 2024-01-09
+Updates: 2024-01-09
+Last Update: 2025-09-26
 
 Replaces https://github.com/chaojian-zhang/RegRenameWPF
+
+## Changelog
+
+* v0.1: Initial setup
+* v0.2: Update to latest Pure 2; Explicitly use static System.Console.
 */
 
 using System.Text.RegularExpressions;
+using static System.Console;
 
 public record ItemChange(string OldName, string NewName, string OldPath, string NewPath);
 IEnumerable<ItemChange> EnumerateFolderItems(string folder, string pattern, string replacement)

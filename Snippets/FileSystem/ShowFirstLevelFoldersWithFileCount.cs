@@ -1,3 +1,5 @@
+using static System.Console;
+
 void Print(string folder)
 {
 	if (Directory.Exists(folder))

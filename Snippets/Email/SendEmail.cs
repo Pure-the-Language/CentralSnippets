@@ -1,14 +1,20 @@
 /* Send Plain Text Email
-Version: v0.1
+Version: v0.2
 
 Remarks:
 * As of 2025-04-18: The functionalities of this snippet is available in Parcel NExT.
+
+## Changelog
+
+* v0.1: Initial setup
+* v0.2: Update to latest Pure 2; Explicitly use static System.Console.
 */
 Import(Markdig)
 
 using System.Net;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using static System.Console;
 
 #region Helpers
 string ConvertMarkdown(string markdown, bool formatImage = true)

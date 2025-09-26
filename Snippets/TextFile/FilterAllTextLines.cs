@@ -1,8 +1,14 @@
 /* Filter All Text lines
-Version: v0.1
+Version: v0.2
 
 This script provides snippet/template for quickly search through all text files in all subfolders using arbitrary criteria.
+
+## Changelog
+
+* v0.1: Initial setup
+* v0.2: Update to latest Pure 2; Explicitly use static System.Console.
 */
+using static System.Console;
 
 public static readonly string AllFiles = "*.*";
 IEnumerable<string> Filter(string folderPath, string fileNameFilter, Func<string, bool> lineFilter)

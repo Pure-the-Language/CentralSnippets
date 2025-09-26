@@ -1,11 +1,18 @@
 /* Rename Files in Folder using Regular Expressions 
-Version: v0.1
-Last Update: 2024-01-09
+Version: v0.2
+Updates: 2024-01-09
+Last Update: 2025-09-26
 
 Replaces https://github.com/chaojian-zhang/RegRenameWPF
+
+## Changelog
+
+* v0.1: Initial setup
+* v0.2: Update to latest Pure 2; Explicitly use static System.Console.
 */
 
 using System.Text.RegularExpressions;
+using static System.Console;
 
 void Rename(string folder, string pattern, string replacement)
 {
